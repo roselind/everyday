@@ -17,6 +17,7 @@ layout: default
 3. 新建_layouts文件夹, 并在该文件夹内新建默认的layout文件default.html, html内容如下:
 
 ```
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,6 +54,7 @@ layout: default
 </div>
 </body>
 </html>
+
 ```
 
 4. 创建_posts文件夹, 用于存放博客文件. 新建第一篇博客2014-12-29-hello-world.md:
