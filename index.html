@@ -1,6 +1,8 @@
-<!DOCTYPE html>
-<html>
-  <head>
+---
+　　layout: default
+　　title: 我的Blog
+---
+<head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
 
@@ -9,31 +11,40 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
     <title>Everyday by googleyufei</title>
-  </head>
+</head>
 
-  <body>
+<body>
 
-    <header>
-      <div class="container">
+<header>
+    <div class="container">
         <h1>Everyday</h1>
+
         <h2>余飞的时间统计</h2>
 
         <section id="downloads">
-          <a href="https://github.com/googleyufei/everyday/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/googleyufei/everyday/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/googleyufei/everyday" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+            <a href="https://github.com/googleyufei/everyday/zipball/master" class="btn">Download as .zip</a>
+            <a href="https://github.com/googleyufei/everyday/tarball/master" class="btn">Download as .tar.gz</a>
+            <a href="https://github.com/googleyufei/everyday" class="btn btn-github"><span class="icon"></span>View on
+                GitHub</a>
         </section>
-      </div>
-    </header>
-
-    <div class="container">
-      <section id="main_content">
-        <p>这是一个记录余飞和肖敏每天所思所想
-这是一个记录余飞和消息每日所做所写
-这是两个简单人的生活和学习日记</p>
-      </section>
     </div>
+</header>
 
-    
-  </body>
-</html>
+<div class="container">
+    <section id="main_content">
+        <p>这是一个记录余飞和肖敏每天所思所想
+            这是一个记录余飞和消息每日所做所写
+            这是两个简单人的生活和学习日记</p>
+    </section>
+</div>
+
+<h2>{{ page.title }}</h2>
+　　<p>最新文章</p>
+　　
+<ul>
+    　　　　{% for post in site.posts %}
+    　　　　　　
+    <li>{{ post.date | date_to_string }} <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+    　　　　{% endfor %}
+</ul>
+</body>
