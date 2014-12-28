@@ -491,6 +491,139 @@ puts say_hello('ihover')
 # output Hi, ihower 
 ```
 
+方法中的return是可以省略的, Ruby就会返回最后一行运算的值. 上述方法可以定义成: 
+
+```ruby
+def say_hello(name)
+	"Hi, " + name 
+end 
+```
+调用方法时, 括号也是可以省略的, 例如: 
+
+```ruby
+	say_hello 'ihover'
+```
+
+不过, 除了一些方法惯例不加之外(例如puts和Rails中的redirect_to, render), 绝大部分情况要加上括号. 
+
+我们也可以给方法参数预设值: 
+
+```ruby
+
+def say_hello(name = "nobody")
+	result = "Hi, " + name
+	return result
+end 
+
+puts say_hello 	 # output Hi, nobody 
+
+```
+不用传递参数的方法可以不用带上"()"来调用. 
+
+** ?与!的惯例 ** 
+
+方法名称可以用?或!结尾, 前者表示会返回Boolean值, 后者暗示会有某种副作用(side-effect), 例如: 
+
+```ruby
+
+array = [2, 1, 3]
+
+array.empty? 	# false 
+array.sort 		# [1, 2, 3]
+
+array.inspect 	# [2, 1, 3]
+
+array.sort! 	# [1, 2, 3]
+array.inspect 	# [1, 2, 3]
+
+```
+
+### ruby面向对象
+
+ruby中的class是以大写字母开头, 其实也是一种常数, 使用new方法可以创建对象.
+
+之前所学的字符串, 数组和Hash, 可以通过如下方式建立: 
+
+```ruby
+
+color_string = String.new
+color_string = "" 	# 等同
+
+color_array = Array.new 
+color_array = []  	# 等同
+
+color_hash = Hash.new
+color_hash = {} 	# 等同
+
+time = Time.new 	# 内建的时间类型
+puts time 
+
+```
+
+如何自定义类型: 
+
+```ruby
+
+class Person 
+
+	def initialize(name)
+		@name = name # 成员变量
+	end 
+
+	def say(word)
+		puts "${word}, #{name}"
+	end
+end 
+
+p1 = Person.new("ihower")
+p2 = Person.new("ihover")
+
+p1.say("Hello")		# Hello, ihower 
+p2.say("Hello")		# Hello, ihover 
+
+```
+
+在双引号字符串中使用#{var}来作字符串嵌入, 比"+"相加更有效率. 
+
+除了对象方法与对象变量, Ruby也有属于类方法和类变量: 
+
+```ruby
+
+class Person 
+	
+	@@name = "ihower" 	# 类变量
+
+	def self.say 
+		puts @@name 
+	end 
+
+end 
+
+Person.say 	# ihower 
+
+```
+
+**对象封装**
+
+所有的对象变量(@开头), 类变量(@@开头), 都是封装在类内部的, 类外的代码是无法存取的: 
+
+```ruby
+
+class Person 
+
+	def initalize(name)
+		@name = name 
+	end 
+
+end 
+
+p = Person.new('ihower')
+p.name 	# 出现NoMethodError错误
+p.name = 'peny' # 出现NoMethodError错误
+
+```
+
+
 
 
 
