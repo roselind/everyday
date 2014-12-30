@@ -1005,13 +1005,139 @@ end
 
 puts my_sum(1, 2, 3, 4) # [1, 2, 3, 4]
 ```
+其中my_sum方法中val是一个包含所有参数的数组
+
+**参数尾巴的Hash可以省略{}**
+
+```ruby
+def my_print(a, b, options)
+	puts a 
+	puts b 	
+	puts options[:x]
+	puts options[:y]
+	puts options[:z]
+end 
+
+my_print("A", "B", {:x => 123, :z => 456})
+my_print("A", "B", :x => 123, :z => 456)
+
+# A
+# B
+# 123
+# nil
+# 456
+
+```
+
+**异常处理**
+
+使用rescue可以将异常救回来: 
+
+```ruby
+begin 
+	puts 10/0 # 这回爆出ZeroDivisionError
+rescue => e 
+	puts e.class # 如果抛出异常会执行这一行
+ensure
+	# 无论有没有抛出异常, ensure这一行都会执行
+end 
+
+```
+
+**使用raise可以手动抛出异常**
+
+```ruby
+raise "Not works!"
+# throw Runtime Exception 
+
+# 自定义异常
+class MyException < RuntimeError
+	# ... 
+end 
+
+raise MyException 
+
+```
+
+### Metaprogramming 用程序写程序
+
+Metaprogramming是一个进阶技巧, 这里示范使用define_method方法可以动态定义方法: 
+
+```ruby
+class Dragon
+
+	define_method(:foo) { puts "bar"}
+
+	['a', 'bc','c','d','e','f'].each do |x| 
+		define_method(x) { puts x}
+	end 
+end 
+
+dragon = Dragon.new 
+dragon.foo  	# bar
+dragon.a 		# a
+dragon.b 		# b
+
+``` 
+
+### introspection 反射机制
+
+Ruby拥有许多反射方法, 可以动态知道对象的信息: 
+
+```ruby
+
+# 返回对象拥有的方法
+Object.methods 
+# => ["send", "name", "class_eval", "object_id", "new", "singleton_methods",...]
+
+# 这个对象有这个方法吗? 
+Object.response_to ? :name 
+# true
+
+```
+
+### 其他常见惯例
+
+```ruby
+result ||= a 
+```
+如果result是nil或false的话, 将a赋值给reuslt, 如果不是的话, 什么都不做. 以上代码等同于: 
+
+```ruby
+result || (result = a)
+```
+
+### Ruby 应用
+
++ Sinatra: 轻量级的Web框架
++ 网页设计: 
+
+	+ Sass: CSS Pre-Processor
+	+ Less: CSS Pre-Processor
+	+ Compass: CSS设计框架
+	+ Middleman: 静态网站产生工具
+	+ Jekyll: 静态网站和Blog产生工具
+
++ 自动化测试: 
+
+	+ Cucumber: BDD测试框架
+	+ Watir: 自动化浏览器测试工具
+
++ DevOps: 
+
+	+ Chef: 服务器部署工具
+	+ Puppet: 服务器部署工具
+	+ Vagrant: 虚拟机工具
+
++ iOS/Mac
+	
+	+ CocoaPods: Object-C的套件管理工具
+	+ RubyMotion: Object-C的ruby
+
++ Redmine: 专业任务管理平台
 
 
-
-
-
-
-
+			
 
 
 
