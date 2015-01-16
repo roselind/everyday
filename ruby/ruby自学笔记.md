@@ -45,8 +45,7 @@ c和php会进行自动类型转换, 而ruby却会报错.
 ```ruby
 i = 1 
 puts "value is: " + i 
-
-# TypeError: can't convert Fixnum into String 
+#TypeError: can't convert Fixnum into String 
 # from(irb):2:in `+`
 # from(irb):2
 ```
@@ -571,7 +570,7 @@ class Person
 	end 
 
 	def say(word)
-		puts "${word}, #{name}"
+		puts "#{word}, #{@name}"
 	end
 end 
 
@@ -1003,7 +1002,9 @@ def my_sum(*val)
 	val.inject { |sum, v| sum + v}
 end 
 
-puts my_sum(1, 2, 3, 4) # [1, 2, 3, 4]
+# val就是[1, 2, 3, 4]
+puts my_sum(1, 2, 3, 4)
+#output 10 
 ```
 其中my_sum方法中val是一个包含所有参数的数组
 
@@ -1091,7 +1092,7 @@ Object.methods
 # => ["send", "name", "class_eval", "object_id", "new", "singleton_methods",...]
 
 # 这个对象有这个方法吗? 
-Object.response_to ? :name 
+Object.response_to? :name 
 # true
 
 ```
