@@ -1,62 +1,115 @@
-# AngularJS权威教程
+# REST实战: 缓存
 
-标签（空格分隔）： angularjs todo
+标签: restful cache 
+--- 
 
----
+### 创建可缓存的内容
 
-## Angular动画
+- GET请求的响应默认是可以缓存的(响应应该包含一个到期时间, 或者有一个验证器)
+- POST请求的响应默认是不可以缓存的, 但如果响应头中包含明确允许的Expires头或者Cache-Control头信息, 那么它还是可以缓存的. 
+- PUT和DELETE请求的响应总是不可缓存的
 
-Angular团队创建了ngAnimate模块, 让我们的应用能够通过如下3中方式创建动画: 
-- 使用CSS3动画
-- 使用CSS3过渡
-- 使用JavaScript动画
+### 为缓存使用响应头信息
 
-自1.2起, ngAnimate就不再是Angular核心的一部分, 安装方式: 
-```js
-bower install --save angular-animate 
-angular.module("myApp", ['ngAnimate'])
+有两种主要的HTTP响应头可以控制缓存的行为: 
+
+- Expires
+
+	为一个缓存的表述指定绝对时间. 过了这个时间, 就认为被缓存的表述是过期的, 必须经过来源服务器的重新验证.服务要声明某个表述已经过期, 可以将Expires值设置成和Date头信息的值相等(这个表述现在就回到期), 或者将Expires设置为0. 
+	如果要使一个表述"永不到期", 服务可以设置Expires值为一年后. 
+
+- Cache-Control
+
+	可以用在请求和响应上, 以控制响应的缓存行为. 这个头信息的值由一个或者多个逗号分隔的指令组成. 这些指令决定了响应是否可以缓存, 如果可以, 那么由谁缓存, 缓存多长时间. 
+
+如何使用Expires和Cache-Control? 
+
+1. 如果我们可以确定一个被缓存响应的绝对到期时间, 就可以使用Expires头. 
+2. 如果指明响应离开来源服务器后还能保持多久有效更合适的话, 就应该使用Cache-Control, 它增加了一个max-age或者s-maxage指令以指定一个相对的生存时间(Time to Live, TTL)
+
+可缓存的响应(无论来自GET还是POST)都应该包含一个验证器--ETag或者Last-Modified头信息: 
+
+- ETag
+	一个ETag值是一个不透明的字符串, 服务器将它与资源相关联, 以便在资源的生命周期中唯一标示其状态. 当资源发生变化时, 实体值也响应发生变化. ETag值不仅可以用来做并发控制, 而且在验证被缓存资源的新鲜度(freshness)方面也同样有用. 
+
+- Last-Modified
+	一个响应的Date信息表示响应是何时生成的, Last-Modified头信息表示相关联资源是在何时修改的. Last-Modified不能晚于Date. 
+
+究竟是选择ETag还是Last-Modified, 应该根据资源更新的频率决定. Last-Modified的准确度仅仅与时间戳(精确到秒)相同, 而ETag能以任意频率生成. 但是通常生成时间戳的开销较小. 
+
+### 在响应中使用缓存指令 
+
+
+当被用在响应中时, Cache-Control指令有3个功能: 
+
+	- 一些指令要求将通常不可缓存的响应缓存起来
+	- 另一些指令要求不将通常可以缓存的响应缓存起来
+	- 剩下的指令完全不影响一个响应是否缓存起来, 它们只是用来确定已经缓存起来的响应的新鲜度. 
+
+一个单独的Cache-Control指令可以具有以下一个或者多个功能
+
+具体的Cache-Control指令列表: 
+
+- max-age=<delat-seconds>
+
+> 该指令可以同时控制可缓存性和新鲜度. 它使用本地缓存和共享缓存(代理缓存和反向代理缓存)将一个响应缓存起来, 并且以秒为单位制定其保鲜寿命. 一个max-age值会覆盖响应中的任何Expires值. 
+
+- s-maxage=<delta-seconds>
+
+> 和max-age一样, 这条指令有2个功能: 它使响应缓存起来, 但只能由共享缓存来做这件事, 并且以秒为单位指定了其保鲜寿命 
+
+- public
+
+> 这个指令使本地缓存或者共享缓存将一个响应缓存起来, 但它没有指定一个新鲜度值. 重要的是, public优先于Authorization头信息. 一般来说, 如果一个请求包含一个Authorization头信息, 那么响应不会被缓存, 但设置了public指令的响应例外. 但缓存需要身份认证的响应时, 你应该谨慎. 
+
+- private
+
+> 这个指令使一个响应被缓存, 但只能在本地缓存(在浏览器或者其他客户端). 它可以防止共享缓存将通常可以缓存的响应缓存起来. private不指定新鲜度值. 
+
+- must-revalidate
+
+> 这个指令使通常不可缓存的响应缓存起来, 但需要缓存重新到来源服务器上验证一下过期的响应. 只有当过期的响应成功通过来源服务器的验证, 缓存的内容才可以被用于满足需求. 
+> must-revalidate指令在平衡一致性(consistency)方面非常有用, 可以减少带宽和计算资源的消耗. 虽然它强制要求到来源服务器上重新验证请求, 但一种服务器端有效的验证机制能阻止核心服务逻辑被请求重复调用, 而开销仅仅是生成一些304 Not Modified响应. 
+
+- proxy-revalidate
+
+> 除了只适用于共享缓存外, 这个指令和must-revalidate相同 
+
+- no-cache 
+
+> 这个指令要求缓存为每个请求都到来源服务器上重新验证已缓存的响应. 如果请求通过验证, 则缓存的内容可以使用.
+> 这个指令仅适用于已经被其他头信息或者指令设置为可缓存的情况(即它不能使可以缓存的响应不被缓存)
+> 不幸的是, 不同的缓存对于no-cache有不同的行为, 一些缓存将no-cache作为一个不缓存响应的指令. 
+
+- no-store 
+
+> 这个指令使得所有缓存(包括本地缓存, 代理缓存, 反向代码缓存)不将可以被缓存的内容缓存起来. 
+
+HTTP Stale Controls Information RFC最近增加了2条新的指令: 
+
+- stale-while-revalidate=<delta-seconds>
+
+> 在缓存能够发布(release)一个国企的被缓存响应的情况下, 这条指令允许缓存立刻发布响应, 同时它也指示缓存在后台(即以非阻塞的方式)重新验证被缓存响应. 
+> 这条指令以牺牲一致性为代价, 减少了延迟(缓存立即发布过期的响应, 同时重新验证它).如果一个过期的表述没有在delta-seconds(指定的秒数)之前完成重新验证, 那么缓存已经放弃使用它. 
+
+- stale-if-error=<delta-seconds> 
+
+> 该指令允许一个缓存在联系来源服务器发生错误时发布一个过期的缓存响应. 如果一个被缓存响应比delta-seconds指定的时间范围更旧, 那么就不应该发布它. 这条指令以牺牲一致性为代价, 提供了可用性. 
+
+### 栗子
+
+- 使缓存的内容仅存在于本地缓存, 时间为1个小时
 ```
-### 动画运作方式? 
+Cache-Control: private, max-age=3600
+```
 
-$animate服务默认给动画元素的每个动画事件添加两个CSS类, 支持多个angular内置的指令, 无需额外的配置即可支持动画. 
-所有这些预先存在的支持动画的指令, 都是通过监听指令上的事件实现的. 例如, 
-- 当一个新的ngView进入并且把新的内容带进浏览器时, 这个事件就叫做ngView的enter事件. 
-- 当ngHide准备一个元素时, remove事件就会触发. 
-
-下面是指令以及不同状态触发的事件列表: 
-|   指令    |   事件    |
-|:------------:|:-------------------:|
-|ngRepeat| enter, leave, move|
-|ngView|    enter , leave |
-|ngInclude| enter, leave|
-|ngSwitch| enter, leave|
-|ngIf| enter, leave|
-|ngClass or class=''|add, remove|
-|ngShow| add, remove(.ng-class)|
-|ngHide| add, remove|
-
-$animate服务基于指令发出的事件来添加特定的样式类.
-- 对于结构性(比如进入, 移动和离开), 添加上去的CSS类是ng-[EVENT]和ng-[EVENT]-active这样的形式. 
-- 对于基于样式类的动画(比如ngClass), 动画样式类的形式是: [CLASS]-add, [CLASS]-add-active, [CLASS]-remove, [CLASS]-remove-active. 
-- 对于ngShow和ngHide, 只有.ng-hide类会被添加和移动, 它的形式跟ngClass一样: ng-hide-add, ng-hide-active, ng-hide-active, ng-hide-remove, ng-hide-remove-active. 
-
-### 自动添加类
-
-触发enter事件的指令会在DOM变更时收到一个.ng-enter样式类, 然后, angular添加ng-enter-active类, 它会触发动画. ngAnimate自动检测CSS代码来判定动画什么时候完成. 
-
-这个事件完成后, Angular会从DOM中移除ng-enter和ng-enter-active两个类, 使我们能够在DOM元素上定义动画相关的属性. 
-
-如果浏览器不支持CSS过渡或者动画, 动画会开始, 然后立即结束, DOM会处于最终状态, 不会添加过渡或者动画的样式类. 
-
-所有支持的结构性动画事件都遵循着同样的约定: 进入, 离开, 移动. 基于样式的动画事件略有不同. 
-
-### 使用CSS过渡动画
-
-
-
-
-
-
+- 缓存身份认证后的响应
+```
+Cache-Control: public ,max-age=0 
+``` 
+> public使得响应能被本地缓存和共享缓存缓存住, 但max-age=0需要再发布被缓存表述前去到源服务器上重新验证(使用一个条件GET). 理想情况下, 我们使用no-cache, 但是由于一些缓存将no-cache当成了完全不缓存指令处理, 所以选择max-age=0代替.
+> 当我们想要为每个请求授权, 同时又希望通过缓存基础设施提供相应以节省带宽时, 这个组合非常有用的. 
+> 当到服务器上重新验证每个请求时, 缓存会将消费者提供的Authorization头信息内容传递到服务器, 如果来源服务器返回了401, 表示未通过认证, 缓存将不会发布被缓存的表述. 这个public, max-age=0组合不同于must-revalidate的地方, 就是它允许缓存那些包含Authorization头信息的请求对象的响应. 
 
 
 
