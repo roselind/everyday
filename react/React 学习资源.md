@@ -4,7 +4,7 @@ React 学习资源
 ## Article 
 
 - [react支持ES6](http://www.infoq.com/cn/news/2015/03/react-es6-classes)
-
+- [React Native第一印象](http://blog.leapoahead.com/2015/03/27/react-native-first-impression/)
 
 ## Peter Hunt 
 
